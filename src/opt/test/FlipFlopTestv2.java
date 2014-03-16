@@ -1,13 +1,12 @@
 package opt.test;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import dist.DiscreteDependencyTree;
-import dist.DiscretePermutationDistribution;
 import dist.DiscreteUniformDistribution;
 import dist.Distribution;
-import opt.SwapNeighbor;
+import opt.DiscreteChangeOneNeighbor;
+import opt.EvaluationFunction;
 import opt.GenericHillClimbingProblem;
 import opt.HillClimbingProblem;
 import opt.NeighborFunction;
@@ -15,7 +14,8 @@ import opt.RandomizedHillClimbing;
 import opt.SimulatedAnnealing;
 import opt.example.*;
 import opt.ga.CrossoverFunction;
-import opt.ga.SwapMutation;
+import opt.ga.DiscreteChangeOneMutation;
+import opt.ga.SingleCrossOver;
 import opt.ga.GenericGeneticAlgorithmProblem;
 import opt.ga.GeneticAlgorithmProblem;
 import opt.ga.MutationFunction;
@@ -26,35 +26,28 @@ import opt.prob.ProbabilisticOptimizationProblem;
 import shared.FixedIterationTrainer;
 
 /**
- * 
+ * A test using the flip flop evaluation function
  * @author Andrew Guillory gtg008g@mail.gatech.edu
  * @version 1.0
  */
-public class TravelingSalesmanTest {
+public class FlipFlopTestv2 {
     /** The n value */
-    private static final int N = 50;
-    /**
-     * The test main
-     * @param args ignored
-     */
-    /** The maximum volume for a single element */
-    //private static final double MAX_DISTANCE = 50;
+    private static final int N = 80;
+    
+    private static final int T = N/10;
+    
     public static void main(String[] args) {
-        Random random = new Random();
-        // create the random points
-        double[][] points = new double[N][2];
-        for (int i = 0; i < points.length; i++) {
-            points[i][0] = random.nextDouble();
-            points[i][1] = random.nextDouble();   
-        }
-        // for rhc, sa, and ga we use a permutation based encoding
-        TravelingSalesmanEvaluationFunction ef = new TravelingSalesmanRouteEvaluationFunction(points);
-        Distribution odd = new DiscretePermutationDistribution(N);
-        NeighborFunction nf = new SwapNeighbor();
-        MutationFunction mf = new SwapMutation();
-        CrossoverFunction cf = new TravelingSalesmanCrossOver(ef);
+        int[] ranges = new int[N];
+        Arrays.fill(ranges, 2);
+        EvaluationFunction ef = new FourPeaksEvaluationFunction(T);
+        Distribution odd = new DiscreteUniformDistribution(ranges);
+        NeighborFunction nf = new DiscreteChangeOneNeighbor(ranges);
+        MutationFunction mf = new DiscreteChangeOneMutation(ranges);
+        CrossoverFunction cf = new SingleCrossOver();
+        Distribution df = new DiscreteDependencyTree(.1, ranges); 
         HillClimbingProblem hcp = new GenericHillClimbingProblem(ef, odd, nf);
         GeneticAlgorithmProblem gap = new GenericGeneticAlgorithmProblem(ef, odd, mf, cf);
+        ProbabilisticOptimizationProblem pop = new GenericProbabilisticOptimizationProblem(ef, odd, df);
         String annealingresults = "";
         String garesults = "";
         String mimicresults = "";
@@ -78,15 +71,15 @@ double[] temp = { 100, 200 , 300, 400,500, 600, 700, 800 };
     			{	
         
         
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp);
-        fit = new FixedIterationTrainer(sa, 300000);
+        SimulatedAnnealing sa = new SimulatedAnnealing(temperature, cool, hcp);
         double start = System.nanoTime();
+        fit = new FixedIterationTrainer(sa, 200000);
         fit.train();
         double end = System.nanoTime();
         double testingTime = end - start;
         System.out.println(ef.value(sa.getOptimal()));
         annealingresults += "\n"+ ef.value(sa.getOptimal()) + "for the following parameters" + 
-        "start temperature=" + temperature + "cooling rate=" + cool + "testingtime is " + testingTime;
+        "start temperature=" + temperature + "cooling rate=" + cool + "testingtime is " + testingTime ;
         
     			}
     			};
@@ -103,8 +96,7 @@ double[] temp = { 100, 200 , 300, 400,500, 600, 700, 800 };
         double testingTime = end - start;
         System.out.println(ef.value(ga.getOptimal()));
         garesults += "\n"+ ef.value(ga.getOptimal()) + "for the following parameters, Population size of "
-        + popSize + " mate= " + popSize/2 + " mutate= "+ popSize/10 
-        + "testingtime is " + testingTime;
+        + popSize + " mate= " + popSize/2 + " mutate= "+ popSize/10 + "testingtime is " + testingTime;
         
         };
         System.out.println(garesults);
@@ -112,32 +104,21 @@ double[] temp = { 100, 200 , 300, 400,500, 600, 700, 800 };
 int[] samplespace = { 100, 200 , 300, 400,500, 600, 700, 800 };
     	
 int[] randsamples = {10,20, 30 ,40 , 50, 60 , 70, 80, 90};
-            for (int samples : samplespace)
+            for (int samples :  samplespace)
     			{ 
             
                 for (int randomsamples : randsamples)
     			{	
-
-
-                	//for mimic we use a sort encoding
-                	ef = new TravelingSalesmanSortEvaluationFunction(points);
-                	int[] ranges = new int[N];
-                	Arrays.fill(ranges, N);
-                	odd = new  DiscreteUniformDistribution(ranges);
-                	Distribution df = new DiscreteDependencyTree(.1, ranges); 
-                	ProbabilisticOptimizationProblem pop = new GenericProbabilisticOptimizationProblem(ef, odd, df);
-
-
         MIMIC mimic = new MIMIC(samples, randomsamples, pop);
         double start = System.nanoTime();
-        fit = new FixedIterationTrainer(mimic, 100);
+        fit = new FixedIterationTrainer(mimic, 2000);
         fit.train();
         double end = System.nanoTime();
         double testingTime = end - start;
         System.out.println(ef.value(mimic.getOptimal()));
         mimicresults += "\n"+ ef.value(mimic.getOptimal()) + "for the following parameters " +
-        		" number of samples = " + samples + " number of random samples= " + randomsamples
-        		+ "testingtime is " + testingTime;
+        		" number of samples = " + samples + " number of random samples= " + randomsamples +
+        		"testingtime is " + testingTime;
         
     			}
     			};
@@ -145,6 +126,3 @@ int[] randsamples = {10,20, 30 ,40 , 50, 60 , 70, 80, 90};
     }
 
 }
-
-
-

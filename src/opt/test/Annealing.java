@@ -23,14 +23,14 @@ import java.text.*;
  * @author Hannah Lau
  * @version 1.0
  */
-public class AbaloneTest {
+public class Annealing {
     private static Instance[] instances = initializeInstances();
 /**
  * use a loop to test different training iterations and hidden layers,
  * as well as parameters for the randomized algorithms, such as starting
  * temperature for annealing, or population size for genetic algo
  */
-    private static int inputLayer = 7, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
+    private static int inputLayer = 57, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
     private static BackPropagationNetworkFactory factory = new BackPropagationNetworkFactory();
     
     private static ErrorMeasure measure = new SumOfSquaresError();
@@ -43,22 +43,34 @@ public class AbaloneTest {
     private static OptimizationAlgorithm[] oa = new OptimizationAlgorithm[3];
     private static String[] oaNames = {"RHC", "SA", "GA"};
     private static String results = "";
+    private static String results2 = "";
 
     private static DecimalFormat df = new DecimalFormat("0.000");
 
     public static void main(String[] args) {
-        for(int i = 0; i < oa.length; i++) {
+        for(int i = 1; i == 1; i++) {
             networks[i] = factory.createClassificationNetwork(
                 new int[] {inputLayer, hiddenLayer, outputLayer});
             nnop[i] = new NeuralNetworkOptimizationProblem(set, networks[i], measure);
         }
 
-        oa[0] = new RandomizedHillClimbing(nnop[0]);
-        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1]);
-        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2]);
 
-        for(int i = 0; i < oa.length; i++) {
-            double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
+    	double[] temp = { 1E8, 1E9 , 1E10, 1E11,1E12, 1E13, 1E14, 1E15 };
+    	
+    	double[] coolingRate = {.90,.91,.92,.93,.94,.95,.96,.97,.98,.99};
+        
+        for(int i = 1; i == 1 ; i++) {
+        	
+            for (double temperature : temp)
+    			{ 
+            	
+                for (double cool : coolingRate)
+    			{	
+            	
+    			
+            
+        	oa[1] = new SimulatedAnnealing(temperature, cool, nnop[1]);
+        	double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
             train(oa[i], networks[i], oaNames[i]); //trainer.train();
             end = System.nanoTime();
             trainingTime = end - start;
@@ -86,12 +98,23 @@ public class AbaloneTest {
             results +=  "\nResults for " + oaNames[i] + ": \nCorrectly classified " + correct + " instances." +
                         "\nIncorrectly classified " + incorrect + " instances.\nPercent correctly classified: "
                         + df.format(correct/(correct+incorrect)*100) + "%\nTraining time: " + df.format(trainingTime)
-                        + " seconds\nTesting time: " + df.format(testingTime) + " seconds\n";
+                        + " seconds\nTesting time: " + df.format(testingTime) + " seconds\n"
+                        + " Cooling rate was " + cool + " Temp was " + (temp) ;
+            results2 =  "\nResults for " + oaNames[i] + ": \nCorrectly classified " + correct + " instances." +
+                    "\nIncorrectly classified " + incorrect + " instances.\nPercent correctly classified: "
+                    + df.format(correct/(correct+incorrect)*100) + "%\nTraining time: " + df.format(trainingTime)
+                    + " seconds\nTesting time: " + df.format(testingTime) + " seconds\n"
+                    + " Cooling rate was " + cool + " Temp was " + (temp) ;
+        //print the results for each param combo
+            System.out.println(results2);
         }
-
-        System.out.println(results);
+ 
+    	}
+        }
+        //print all the results at the very end. 
+        System.out.println(results);            
     }
-
+//add the parameters
     private static void train(OptimizationAlgorithm oa, BackPropagationNetwork network, String oaName) {
         System.out.println("\nError results for " + oaName + "\n---------------------------");
 
@@ -114,24 +137,31 @@ public class AbaloneTest {
 
     private static Instance[] initializeInstances() {
 
-        double[][][] attributes = new double[4177][][];
+        double[][][] attributes = new double[3220][][];
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("src/opt/test/abalone.txt")));
+            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/spam_train.txt")));
 
             for(int i = 0; i < attributes.length; i++) {
                 Scanner scan = new Scanner(br.readLine());
                 scan.useDelimiter(",");
-
+                //for each instance we have a 2 dimen array
+                //first dimension determines if it is inputs or the output
+                //the second has the array of inputs or the binary output
                 attributes[i] = new double[2][];
-                attributes[i][0] = new double[7]; // 7 attributes
+                //when the second dimension is 0 we feed in the inputs
+                attributes[i][0] = new double[57]; 
+                // when the second dimension is 1 we feed the output label
                 attributes[i][1] = new double[1];
-
-                for(int j = 0; j < 7; j++)
-                    attributes[i][0][j] = Double.parseDouble(scan.next());
-
+                //format of array is:
+                //Row number, if 0 then inputs, if 2 then outputs, label value or input value
+                for(int j = 0; j < 57; j++)
+                //for each dimension
+                //store the attributes for each j
+                attributes[i][0][j] = Double.parseDouble(scan.next());
+                //store the label (only element in [i][1][0]
                 attributes[i][1][0] = Double.parseDouble(scan.next());
-            }
+                }
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -141,8 +171,7 @@ public class AbaloneTest {
 
         for(int i = 0; i < instances.length; i++) {
             instances[i] = new Instance(attributes[i][0]);
-            // classifications range from 0 to 30; split into 0 - 14 and 15 - 30
-            instances[i].setLabel(new Instance(attributes[i][1][0] < 15 ? 0 : 1));
+            instances[i].setLabel(new Instance(attributes[i][1][0] == 0 ? 0 : 1));
         }
 
         return instances;

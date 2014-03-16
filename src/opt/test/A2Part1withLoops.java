@@ -23,14 +23,14 @@ import java.text.*;
  * @author Hannah Lau
  * @version 1.0
  */
-public class AbaloneTest {
+public class A2Part1withLoops {
     private static Instance[] instances = initializeInstances();
 /**
  * use a loop to test different training iterations and hidden layers,
  * as well as parameters for the randomized algorithms, such as starting
  * temperature for annealing, or population size for genetic algo
  */
-    private static int inputLayer = 7, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
+    private static int inputLayer = 57, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
     private static BackPropagationNetworkFactory factory = new BackPropagationNetworkFactory();
     
     private static ErrorMeasure measure = new SumOfSquaresError();
@@ -114,24 +114,31 @@ public class AbaloneTest {
 
     private static Instance[] initializeInstances() {
 
-        double[][][] attributes = new double[4177][][];
+        double[][][] attributes = new double[3220][][];
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("src/opt/test/abalone.txt")));
+            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/spam_train.txt")));
 
             for(int i = 0; i < attributes.length; i++) {
                 Scanner scan = new Scanner(br.readLine());
                 scan.useDelimiter(",");
-
+                //for each instance we have a 2 dimen array
+                //first dimension determines if it is inputs or the output
+                //the second has the array of inputs or the binary output
                 attributes[i] = new double[2][];
-                attributes[i][0] = new double[7]; // 7 attributes
+                //when the second dimension is 0 we feed in the inputs
+                attributes[i][0] = new double[57]; 
+                // when the second dimension is 1 we feed the output label
                 attributes[i][1] = new double[1];
-
-                for(int j = 0; j < 7; j++)
-                    attributes[i][0][j] = Double.parseDouble(scan.next());
-
+                //format of array is:
+                //Row number, if 0 then inputs, if 2 then outputs, label value or input value
+                for(int j = 0; j < 57; j++)
+                //for each dimension
+                //store the attributes for each j
+                attributes[i][0][j] = Double.parseDouble(scan.next());
+                //store the label (only element in [i][1][0]
                 attributes[i][1][0] = Double.parseDouble(scan.next());
-            }
+                }
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -141,8 +148,7 @@ public class AbaloneTest {
 
         for(int i = 0; i < instances.length; i++) {
             instances[i] = new Instance(attributes[i][0]);
-            // classifications range from 0 to 30; split into 0 - 14 and 15 - 30
-            instances[i].setLabel(new Instance(attributes[i][1][0] < 15 ? 0 : 1));
+            instances[i].setLabel(new Instance(attributes[i][1][0] == 0 ? 0 : 1));
         }
 
         return instances;

@@ -13,8 +13,7 @@ public class DiscreteUniformDistribution extends AbstractDistribution {
     /**
      * The ranges of the data
      */
-    private int[] n;
-    
+    private int[] n ;
     /**
      * The probability
      */

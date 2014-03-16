@@ -35,12 +35,14 @@ public class ContinuousPeaksTest {
     /** The n value */
     private static final int N = 60;
     /** The t value */
+    //see charles' paper for an explanation of the scope of the problem.
+    //reminder to change to but string 
     private static final int T = N / 10;
     
     public static void main(String[] args) {
         int[] ranges = new int[N];
         Arrays.fill(ranges, 2);
-        EvaluationFunction ef = new ContinuousPeaksEvaluationFunction(T);
+        EvaluationFunction ef = new FourPeaksEvaluationFunction(T);
         Distribution odd = new DiscreteUniformDistribution(ranges);
         NeighborFunction nf = new DiscreteChangeOneNeighbor(ranges);
         MutationFunction mf = new DiscreteChangeOneMutation(ranges);

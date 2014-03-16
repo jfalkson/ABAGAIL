@@ -1,5 +1,7 @@
 package opt.prob;
 
+import java.text.DecimalFormat;
+
 import dist.Distribution;
 import opt.EvaluationFunction;
 import opt.GenericOptimizationProblem;
@@ -23,9 +25,9 @@ public class GenericProbabilisticOptimizationProblem extends GenericOptimization
      * @param fact the distribution factory
      */
     public GenericProbabilisticOptimizationProblem(EvaluationFunction eval, Distribution dist,
-             Distribution d) {
+             Distribution df) {
         super(eval, dist);
-        this.dist = d;
+        this.dist = df;
     }
 
     /**
