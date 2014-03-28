@@ -31,6 +31,8 @@ public class MLTest2 {
  * temperature for annealing, or population size for genetic algo
  */
     private static int inputLayer = 57, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
+    
+
     private static BackPropagationNetworkFactory factory = new BackPropagationNetworkFactory();
     
     private static ErrorMeasure measure = new SumOfSquaresError();
@@ -54,8 +56,8 @@ public class MLTest2 {
         }
 
         oa[0] = new RandomizedHillClimbing(nnop[0]);
-        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1]);
-        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2]);
+        oa[1] = new SimulatedAnnealing(100, .92, nnop[1]);
+        oa[2] = new StandardGeneticAlgorithm(240, 120, 24, nnop[2]);
 
         for(int i = 0; i < oa.length; i++) {
             double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
@@ -89,7 +91,6 @@ public class MLTest2 {
                         + " seconds\nTesting time: " + df.format(testingTime) + " seconds\n";
         }
 
-        System.out.println(results);
     }
 
     private static void train(OptimizationAlgorithm oa, BackPropagationNetwork network, String oaName) {
@@ -99,16 +100,24 @@ public class MLTest2 {
             oa.train();
 
             double error = 0;
+            double correct = 0, incorrect = 0;
             for(int j = 0; j < instances.length; j++) {
                 network.setInputValues(instances[j].getData());
                 network.run();
+            	double predicted, actual;
+                predicted = Double.parseDouble(instances[j].getLabel().toString());
+                actual = Double.parseDouble(networks[0].getOutputValues().toString());
 
+                
                 Instance output = instances[j].getLabel(), example = new Instance(network.getOutputValues());
                 example.setLabel(new Instance(Double.parseDouble(network.getOutputValues().toString())));
                 error += measure.value(output, example);
+                
+                double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
+                
             }
 
-            System.out.println(df.format(error));
+
         }
     }
 

@@ -57,16 +57,17 @@ public class FourPeaksTest {
         
         //loop through number of iterations
         RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp);      
-        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 200000);
-        fit.train();
-        System.out.println(ef.value(rhc.getOptimal()));
-        
-        
+       FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 200000);
+       // fit.train();
+      //  System.out.println(ef.value(rhc.getOptimal()));
+
+       for (int iterations = 1; iterations < 2001; iterations++) {
+       
         //loop through different temperatures and cooling rates
-double[] temp = { 100, 200 , 300, 400,500, 600, 700, 800 };
-    	
-    	double[] coolingRate = {.90,.91,.92,.93,.94,.95,.96,.97,.98,.99};
-   	
+//double[] temp = { 100, 200 , 300, 400,500, 600, 700, 800 };
+        double[] temp = { 700 };	
+    	//double[] coolingRate = {.90,.91,.92,.93,.94,.95,.96,.97,.98,.99};
+double[] coolingRate = {.92};
             for (double temperature : temp)
     			{ 
             	
@@ -74,40 +75,42 @@ double[] temp = { 100, 200 , 300, 400,500, 600, 700, 800 };
     			{	
         
         
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp);
-        fit = new FixedIterationTrainer(sa, 2000);
+        SimulatedAnnealing sa = new SimulatedAnnealing(700, .92, hcp);
+        fit = new FixedIterationTrainer(sa, iterations);
         double start = System.nanoTime();
-        fit.train();
+      //  fit.train();
         double end = System.nanoTime();
         double testingTime = end - start;
-        System.out.println(ef.value(sa.getOptimal()));
+        testingTime /= Math.pow(10,9);
+       // System.out.println("annealing " + iterations + " value " + ef.value(sa.getOptimal()) + " TestTime " + testingTime);
         annealingresults += "\n"+ ef.value(sa.getOptimal()) + "for the following parameters" + 
         "start temperature=" + temperature + "cooling rate=" + cool + "testingtime is " + testingTime;
         
     			}
     			};
-    	System.out.println(annealingresults);
+    	//System.out.println(annealingresults);
         
         //Loop through different populations & try different iterations of the best
         //population
-        for (int popSize = 180; popSize < 300; popSize = popSize + 20){
+        for (int popSize = 200; popSize < 201; popSize = popSize + 20){
         StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(popSize, popSize/2, popSize/10, gap);
         double start = System.nanoTime();
-        fit = new FixedIterationTrainer(ga, 2000);
+        fit = new FixedIterationTrainer(ga, iterations);
         fit.train();
         double end = System.nanoTime();
         double testingTime = end - start;
-        System.out.println(ef.value(ga.getOptimal()));
+        testingTime /= Math.pow(10,9);
+       System.out.println("GA " + iterations + " value " + ef.value(ga.getOptimal()) + " TestTime " + testingTime);
         garesults += "\n"+ ef.value(ga.getOptimal()) + "for the following parameters, Population size of "
         + popSize + " mate= " + popSize/2 + " mutate= "+ popSize/10 
         + "testingtime is " + testingTime;
         
         };
-        System.out.println(garesults);
+       // System.out.println(garesults);
         //Loop through mimic params
-int[] samplespace = { 100, 200 , 300, 400,500, 600, 700, 800 };
+int[] samplespace = { 500 };
     	
-int[] randsamples = {10,20, 30 ,40 , 50, 60 , 70, 80, 90};
+int[] randsamples = {30};
             for (int samples : samplespace)
     			{ 
             
@@ -115,18 +118,20 @@ int[] randsamples = {10,20, 30 ,40 , 50, 60 , 70, 80, 90};
     			{	
         MIMIC mimic = new MIMIC(samples, randomsamples, pop);
         double start = System.nanoTime();
-        fit = new FixedIterationTrainer(mimic, 2000);
-        fit.train();
+       // fit = new FixedIterationTrainer(mimic, iterations);
+       // fit.train();
         double end = System.nanoTime();
         double testingTime = end - start;
-        System.out.println(ef.value(mimic.getOptimal()));
+        testingTime /= Math.pow(10,9);
+       // System.out.println("MIMIC " + iterations +" value " + ef.value(mimic.getOptimal()) + " TestTime " + testingTime);
         mimicresults += "\n"+ ef.value(mimic.getOptimal()) + "for the following parameters " +
         		" number of samples = " + samples + " number of random samples= " + randomsamples
         		+ "testingtime is " + testingTime;
         
     			}
     			};
-    	System.out.println(mimicresults);		
+    	//System.out.println(mimicresults);		
     }
-
+    }
+       
 }

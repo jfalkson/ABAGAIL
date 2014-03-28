@@ -61,7 +61,7 @@ public class GA {
 
         for(int i = 2; i == 2; i++) {
         	
-        	for (int popSize = 180; popSize < 300; popSize = popSize + 20)
+        	for (int popSize = 240; popSize < 241; popSize = popSize + 20)
 			{
         	oa[2] = new StandardGeneticAlgorithm(popSize, popSize/2, popSize/10, nnop[2]); 
             double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
@@ -75,7 +75,7 @@ public class GA {
 
             double predicted, actual;
             start = System.nanoTime();
-            for(int j = 0; j < instances.length; j++) {
+            for(int j = 2000; j < 3320; j++) {
                 networks[i].setInputValues(instances[j].getData());
                 networks[i].run();
 
@@ -114,25 +114,43 @@ public class GA {
             oa.train();
 
             double error = 0;
-            for(int j = 0; j < instances.length; j++) {
+            double correct = 0, incorrect = 0, correctTest=0, incorrectTest=0;
+            for(int j = 0; j < 2000; j++) {
+            	double predicted, actual;
                 network.setInputValues(instances[j].getData());
+                predicted = Double.parseDouble(instances[j].getLabel().toString());
+                actual = Double.parseDouble(networks[2].getOutputValues().toString());
+
+                double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
                 network.run();
 
                 Instance output = instances[j].getLabel(), example = new Instance(network.getOutputValues());
                 example.setLabel(new Instance(Double.parseDouble(network.getOutputValues().toString())));
                 error += measure.value(output, example);
             }
+            for(int k = 2000; k < 3220; k++) {
+ ///testing info
+            	double predicted, actual, predictedTest, actualTest;
+                networks[2].setInputValues(instances[k].getData());
+                networks[2].run();
 
-            System.out.println(df.format(error));
+                predictedTest = Double.parseDouble(instances[k].getLabel().toString());
+                actualTest = Double.parseDouble(networks[2].getOutputValues().toString());
+
+                double trash2 = Math.abs(predictedTest - actualTest) < 0.5 ? correctTest++ : incorrectTest++;
+            }
+            
+////shows training error at each iteration
+            System.out.println("Train " + df.format(correct/(correct+incorrect)*100)+ " Test " + df.format(correctTest/(correctTest+incorrectTest)*100));
         }
-    }
+        }
 
     private static Instance[] initializeInstances() {
 
-        double[][][] attributes = new double[3220][][];
+        double[][][] attributes = new double[4601][][];
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/spam_train.txt")));
+            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/spam_dataFULL.txt")));
 
             for(int i = 0; i < attributes.length; i++) {
                 Scanner scan = new Scanner(br.readLine());

@@ -70,8 +70,9 @@ public class RHC {
             networks[i].setWeights(optimalInstance.getData());
 
             double predicted, actual;
+            //testing the data gainst the finished model
             start = System.nanoTime();
-            for(int j = 0; j < instances.length; j++) {
+            for(int j = 2000; j < 3220; j++) {
                 networks[i].setInputValues(instances[j].getData());
                 networks[i].run();
 
@@ -100,26 +101,50 @@ public class RHC {
         for(int i = 0; i < trainingIterations; i++) {
             oa.train();
 
+            double correct = 0, incorrect = 0, correctTest=0, incorrectTest=0;
             double error = 0;
-            for(int j = 0; j < instances.length; j++) {
+            for(int j = 0; j < 2000; j++) {
                 network.setInputValues(instances[j].getData());
                 network.run();
+            	double predicted, actual, predictedTest, actualTest;
+                predicted = Double.parseDouble(instances[j].getLabel().toString());
+                actual = Double.parseDouble(networks[0].getOutputValues().toString());
+
+                double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
 
                 Instance output = instances[j].getLabel(), example = new Instance(network.getOutputValues());
                 example.setLabel(new Instance(Double.parseDouble(network.getOutputValues().toString())));
                 error += measure.value(output, example);
-            }
+                
 
-            System.out.println(df.format(error));
+
+                
+                
+            }
+            for(int k = 2000; k < 3220; k++) {
+ ///testing info
+            	double predicted, actual, predictedTest, actualTest;
+                networks[0].setInputValues(instances[k].getData());
+                networks[0].run();
+
+                predictedTest = Double.parseDouble(instances[k].getLabel().toString());
+                actualTest = Double.parseDouble(networks[0].getOutputValues().toString());
+
+                double trash2 = Math.abs(predictedTest - actualTest) < 0.5 ? correctTest++ : incorrectTest++;
+            }
+            
+////shows training error at each iteration
+            System.out.println("Train " + df.format(correct/(correct+incorrect)*100)+ " Test " + df.format(correctTest/(correctTest+incorrectTest)*100));
+            
         }
     }
 
     private static Instance[] initializeInstances() {
 
         double[][][] attributes = new double[3220][][];
-
+////use validation set to "test" and find ideal parameters, then use test set" 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/spam_train.txt")));
+            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/FINALspam_trainandTest.txt")));
 
             for(int i = 0; i < attributes.length; i++) {
                 Scanner scan = new Scanner(br.readLine());

@@ -55,9 +55,9 @@ public class Annealing {
         }
 
 
-    	double[] temp = { 1E8, 1E9 , 1E10, 1E11,1E12, 1E13, 1E14, 1E15 };
+    	double[] temp = { 100 };
     	
-    	double[] coolingRate = {.90,.91,.92,.93,.94,.95,.96,.97,.98,.99};
+    	double[] coolingRate = {.5};
         
         for(int i = 1; i == 1 ; i++) {
         	
@@ -81,7 +81,9 @@ public class Annealing {
 
             double predicted, actual;
             start = System.nanoTime();
-            for(int j = 0; j < instances.length; j++) {
+            
+           ///modify the network to run on only the test data
+            for(int j = 2000; j < 3220; j++) {
                 networks[i].setInputValues(instances[j].getData());
                 networks[i].run();
 
@@ -122,25 +124,44 @@ public class Annealing {
             oa.train();
 
             double error = 0;
-            for(int j = 0; j < instances.length; j++) {
+            double correct = 0, incorrect = 0, correctTest=0, incorrectTest=0;
+            ///only train the training data (first x) instances
+            for(int j = 0; j < 2000; j++) {
                 network.setInputValues(instances[j].getData());
                 network.run();
+            	double predicted, actual;
+                predicted = Double.parseDouble(instances[j].getLabel().toString());
+                actual = Double.parseDouble(networks[1].getOutputValues().toString());
+
+                double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
 
                 Instance output = instances[j].getLabel(), example = new Instance(network.getOutputValues());
                 example.setLabel(new Instance(Double.parseDouble(network.getOutputValues().toString())));
                 error += measure.value(output, example);
             }
+            for(int k = 2000; k < 3220; k++) {
+ ///testing info
+            	double predicted, actual, predictedTest, actualTest;
+                networks[1].setInputValues(instances[k].getData());
+                networks[1].run();
 
-            System.out.println(df.format(error));
+                predictedTest = Double.parseDouble(instances[k].getLabel().toString());
+                actualTest = Double.parseDouble(networks[1].getOutputValues().toString());
+
+                double trash2 = Math.abs(predictedTest - actualTest) < 0.5 ? correctTest++ : incorrectTest++;
+            }
+            
+////shows training error at each iteration
+            System.out.println("Train " + df.format(correct/(correct+incorrect)*100)+ " Test " + df.format(correctTest/(correctTest+incorrectTest)*100));
+            
         }
     }
-
     private static Instance[] initializeInstances() {
 
         double[][][] attributes = new double[3220][][];
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/spam_train.txt")));
+            BufferedReader br = new BufferedReader(new FileReader(new File("/Users/joefalkson/Desktop/FINALspam_trainandTest.txt")));
 
             for(int i = 0; i < attributes.length; i++) {
                 Scanner scan = new Scanner(br.readLine());
