@@ -1,3 +1,5 @@
+Includes some enhancements to original code. I have added looping functionality to test out different parameters (cooling rate and temperature, for example, in simulated annealing). This assists in finding the optimial parameters for which to run the algorithm.
+
 ABAGAIL
 =======
 
